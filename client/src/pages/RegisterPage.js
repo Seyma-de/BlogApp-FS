@@ -1,17 +1,28 @@
 import React, { useState } from "react";
-
+import axios from "axios";
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const register = async (e) => {
+  async function register(e) {
     e.preventDefault();
-    await fetch("http://localhost:4000", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-      headers: { "Content-Type": "application/json" },
-    });
-  };
+
+    try {
+      const response = await axios.post("http://localhost:4000/register", {
+        username,
+        password,
+      });
+
+      if (response.status === 200) {
+        alert("registration successful");
+      } else {
+        alert("registration failed");
+      }
+    } catch (error) {
+      console.error("İstek sırasında bir hata oluştu:", error.message);
+      alert("registration failed");
+    }
+  }
 
   return (
     <form className="register" onSubmit={register}>
