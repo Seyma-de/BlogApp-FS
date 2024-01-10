@@ -6,8 +6,11 @@ var bcrypt = require("bcryptjs");
 
 const app = express();
 
+const jwt = require("jsonwebtoken");
+
 const salt = bcrypt.genSaltSync(10);
-app.use(cors());
+const secret = "asdfe45ew45w345wegwuwirez9387429329z749238z4";
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 
 mongoose.connect(
@@ -31,7 +34,7 @@ process.on("SIGINT", () => {
     process.exit(0);
   });
 });
-
+//register
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -41,7 +44,34 @@ app.post("/register", async (req, res) => {
     });
     res.json(userDoc);
   } catch (e) {
+    console.log(e);
     res.status(400).json(e);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  const userDoc = await User.findOne({ username });
+
+  if (!userDoc) {
+    // Kullanıcı bulunamadı
+    return res.status(400).json("Kullanıcı bulunamadı");
+  }
+
+  const passOk = bcrypt.compareSync(password, userDoc.password);
+
+  if (passOk) {
+    // Giriş yapıldı
+    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+      if (err) throw err;
+      res.cookie("token", token).json({
+        id: userDoc._id,
+        username,
+      });
+    });
+  } else {
+    // Şifre yanlış
+    res.status(400).json("Yanlış kimlik bilgileri");
   }
 });
 
