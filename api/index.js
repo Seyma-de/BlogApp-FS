@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 
 const salt = bcrypt.genSaltSync(10);
 const secret = "asdfe45ew45w345wegwuwirez9387429329z749238z4";
+
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 
@@ -48,7 +49,7 @@ app.post("/register", async (req, res) => {
     res.status(400).json(e);
   }
 });
-
+//login
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
@@ -61,7 +62,7 @@ app.post("/login", async (req, res) => {
   const passOk = bcrypt.compareSync(password, userDoc.password);
 
   if (passOk) {
-    // Giriş yapıldı
+    // logged in
     jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
       if (err) throw err;
       res.cookie("token", token).json({
@@ -70,8 +71,7 @@ app.post("/login", async (req, res) => {
       });
     });
   } else {
-    // Şifre yanlış
-    res.status(400).json("Yanlış kimlik bilgileri");
+    res.status(400).json("wrong credentials");
   }
 });
 
